@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f0f0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Convierte numeros en palabras usando el sistema mnemotecnico Mayor">
+    <title>Memoria - Mnemotecnia</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Memoria</h1>
+            <p>Convierte numeros en palabras</p>
+        </header>
+
+        <section class="input-section">
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    id="numberInput"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Ingresa numeros..."
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                >
+            </div>
+        </section>
+
+        <section class="result-container hidden" id="resultContainer">
+            <div class="results-grid" id="resultsGrid"></div>
+
+            <div class="navigation">
+                <button class="nav-btn" id="prevBtn" aria-label="Anterior">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <span class="counter" id="counter">1 / 1</span>
+                <button class="nav-btn" id="nextBtn" aria-label="Siguiente">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn copy-btn" id="copyBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copiar
+                </button>
+                <button class="action-btn save-btn" id="saveBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Guardar
+                </button>
+            </div>
+        </section>
+
+        <!-- Save Modal -->
+        <div class="modal" id="saveModal">
+            <div class="modal-content">
+                <h3>Guardar en historial</h3>
+                <input
+                    type="text"
+                    id="tagInput"
+                    placeholder="Etiqueta (ej: DNI, Telefono...)"
+                    autocomplete="off"
+                >
+                <div class="modal-buttons">
+                    <button class="modal-btn cancel" id="cancelSave">Cancelar</button>
+                    <button class="modal-btn confirm" id="confirmSave">Guardar</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="no-results hidden" id="noResults">
+            <p>No se encontraron palabras para este numero.<br>Intenta con menos digitos.</p>
+        </section>
+
+        <section class="history-section">
+            <div class="history-header">
+                <h2>Historial</h2>
+                <button class="clear-btn" id="clearHistory">Limpiar</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <span class="history-empty">Sin historial</span>
+            </div>
+        </section>
+
+        <section class="rules-section">
+            <button class="rules-toggle" id="rulesToggle">
+                <span>Ver reglas del sistema</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="rulesIcon">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div class="rules-content" id="rulesContent">
+                <div class="rules-grid">
+                    <div class="rule-item">
+                        <span class="rule-num">0</span>
+                        <span class="rule-letters">R</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">5</span>
+                        <span class="rule-letters">S, Z</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">1</span>
+                        <span class="rule-letters">L</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">6</span>
+                        <span class="rule-letters">G</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">2</span>
+                        <span class="rule-letters">D</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">7</span>
+                        <span class="rule-letters">T</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">3</span>
+                        <span class="rule-letters">M</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">8</span>
+                        <span class="rule-letters">B, V</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">4</span>
+                        <span class="rule-letters">C, Q, K</span>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-num">9</span>
+                        <span class="rule-letters">N, N</span>
+                    </div>
+                    <div class="rule-wildcards">
+                        Comodines (sin valor): A, E, I, O, U, H, F, J, P, W, X, Y
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="words.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Toggle rules visibility
+        document.getElementById('rulesToggle').addEventListener('click', function() {
+            const content = document.getElementById('rulesContent');
+            const icon = document.getElementById('rulesIcon');
+            content.classList.toggle('visible');
+            icon.style.transform = content.classList.contains('visible') ? 'rotate(180deg)' : '';
+        });
+    </script>
+</body>
+</html>
