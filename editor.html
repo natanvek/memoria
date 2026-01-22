@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoria - Editor de Palabras</title>
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent: #6366f1;
+            --border: #333333;
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .code-group {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            cursor: pointer;
+        }
+
+        .code-header:hover {
+            background: #2a2a2a;
+        }
+
+        .code-number {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 60px;
+        }
+
+        .code-count {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .code-count.duplicate {
+            color: var(--warning);
+        }
+
+        .code-count.single {
+            color: var(--success);
+        }
+
+        .word-list {
+            padding: 0.5rem;
+            display: none;
+        }
+
+        .word-list.expanded {
+            display: block;
+        }
+
+        .word-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .word-item:hover {
+            background: var(--bg-card);
+        }
+
+        .word-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .word-text {
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .word-text.removed {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .word-source {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .actions {
+            position: sticky;
+            bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn.primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: #818cf8;
+        }
+
+        .action-btn.secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .action-btn.secondary:hover {
+            background: #2a2a2a;
+        }
+
+        .action-btn.danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1rem;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            height: 300px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.75rem;
+            padding: 1rem;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .expand-icon {
+            transition: transform 0.2s;
+        }
+
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .quick-btn {
+            padding: 0.25rem 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .quick-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Editor de Palabras</h1>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">Gestiona palabras duplicadas por codigo</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="totalWords">0</div>
+                <div class="stat-label">Palabras</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="totalCodes">0</div>
+                <div class="stat-label">Codigos</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="duplicateCodes">0</div>
+                <div class="stat-label">Con duplicados</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="toRemove">0</div>
+                <div class="stat-label">A eliminar</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="duplicates">Solo duplicados</button>
+            <button class="filter-btn" data-filter="single">Sin duplicados</button>
+        </div>
+
+        <input type="text" class="search-box" id="searchBox" placeholder="Buscar por codigo o palabra...">
+
+        <div id="codeGroups"></div>
+
+        <div class="actions">
+            <button class="action-btn secondary" id="resetBtn">Resetear</button>
+            <button class="action-btn primary" id="exportBtn">Exportar words.js</button>
+        </div>
+    </div>
+
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <h3>Exportar words.js</h3>
+            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                Copia este contenido y reemplaza el archivo words.js
+            </p>
+            <textarea id="exportOutput" readonly></textarea>
+            <div class="modal-buttons">
+                <button class="action-btn secondary" onclick="document.getElementById('exportModal').classList.remove('visible')">Cerrar</button>
+                <button class="action-btn primary" id="copyExport">Copiar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="words.js"></script>
+    <script>
+        class WordEditor {
+            constructor() {
+                this.wordsByCode = new Map();
+                this.removedWords = new Set();
+                this.currentFilter = 'all';
+                this.searchTerm = '';
+
+                this.init();
+            }
+
+            init() {
+                this.buildWordIndex();
+                this.render();
+                this.setupEventListeners();
+                this.updateStats();
+            }
+
+            buildWordIndex() {
+                // Collect all words from both BASE_WORDS and EXTENDED_WORDS
+                const allWords = [];
+
+                if (typeof BASE_WORDS !== 'undefined') {
+                    for (const [code, words] of Object.entries(BASE_WORDS)) {
+                        for (const word of words) {
+                            allWords.push({ word, code, source: 'base' });
+                        }
+                    }
+                }
+
+                if (typeof EXTENDED_WORDS !== 'undefined') {
+                    for (const word of EXTENDED_WORDS) {
+                        const code = wordToCode(word);
+                        if (code) {
+                            allWords.push({ word, code, source: 'extended' });
+                        }
+                    }
+                }
+
+                // Group by code
+                for (const item of allWords) {
+                    if (!this.wordsByCode.has(item.code)) {
+                        this.wordsByCode.set(item.code, []);
+                    }
+                    // Avoid exact duplicates
+                    const existing = this.wordsByCode.get(item.code);
+                    if (!existing.some(e => e.word.toUpperCase() === item.word.toUpperCase())) {
+                        this.wordsByCode.set(item.code, [...existing, item]);
+                    }
+                }
+
+                // Sort codes
+                this.sortedCodes = Array.from(this.wordsByCode.keys()).sort((a, b) => {
+                    // Sort by length first, then numerically
+                    if (a.length !== b.length) return a.length - b.length;
+                    return parseInt(a) - parseInt(b);
+                });
+            }
+
+            getFilteredCodes() {
+                let codes = this.sortedCodes;
+
+                // Filter by type
+                if (this.currentFilter === 'duplicates') {
+                    codes = codes.filter(code => this.wordsByCode.get(code).length > 1);
+                } else if (this.currentFilter === 'single') {
+                    codes = codes.filter(code => this.wordsByCode.get(code).length === 1);
+                }
+
+                // Filter by search
+                if (this.searchTerm) {
+                    const term = this.searchTerm.toLowerCase();
+                    codes = codes.filter(code => {
+                        if (code.includes(term)) return true;
+                        const words = this.wordsByCode.get(code);
+                        return words.some(w => w.word.toLowerCase().includes(term));
+                    });
+                }
+
+                return codes;
+            }
+
+            render() {
+                const container = document.getElementById('codeGroups');
+                const codes = this.getFilteredCodes();
+
+                container.innerHTML = codes.map(code => {
+                    const words = this.wordsByCode.get(code);
+                    const count = words.length;
+                    const countClass = count > 1 ? 'duplicate' : 'single';
+
+                    return `
+                        <div class="code-group" data-code="${code}">
+                            <div class="code-header" onclick="editor.toggleGroup('${code}')">
+                                <span class="code-number">${code}</span>
+                                <div class="quick-actions">
+                                    <button class="quick-btn" onclick="event.stopPropagation(); editor.keepFirst('${code}')">1ro</button>
+                                    <button class="quick-btn" onclick="event.stopPropagation(); editor.keepAll('${code}')">Todos</button>
+                                </div>
+                                <span class="code-count ${countClass}">${count} palabra${count !== 1 ? 's' : ''}</span>
+                                <svg class="expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="word-list" id="list-${code}">
+                                ${words.map((item, idx) => {
+                                    const key = `${code}:${item.word}`;
+                                    const isRemoved = this.removedWords.has(key);
+                                    return `
+                                        <div class="word-item">
+                                            <input type="checkbox"
+                                                   ${!isRemoved ? 'checked' : ''}
+                                                   onchange="editor.toggleWord('${code}', '${item.word.replace(/'/g, "\\'")}')">
+                                            <span class="word-text ${isRemoved ? 'removed' : ''}">${item.word}</span>
+                                            <span class="word-source">${item.source}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            toggleGroup(code) {
+                const list = document.getElementById(`list-${code}`);
+                const group = list.closest('.code-group');
+                list.classList.toggle('expanded');
+                group.querySelector('.code-header').classList.toggle('expanded');
+            }
+
+            toggleWord(code, word) {
+                const key = `${code}:${word}`;
+                if (this.removedWords.has(key)) {
+                    this.removedWords.delete(key);
+                } else {
+                    this.removedWords.add(key);
+                }
+                this.updateStats();
+                this.render();
+                // Re-expand the group
+                const list = document.getElementById(`list-${code}`);
+                if (list) {
+                    list.classList.add('expanded');
+                    list.closest('.code-group').querySelector('.code-header').classList.add('expanded');
+                }
+            }
+
+            keepFirst(code) {
+                const words = this.wordsByCode.get(code);
+                words.forEach((item, idx) => {
+                    const key = `${code}:${item.word}`;
+                    if (idx === 0) {
+                        this.removedWords.delete(key);
+                    } else {
+                        this.removedWords.add(key);
+                    }
+                });
+                this.updateStats();
+                this.render();
+            }
+
+            keepAll(code) {
+                const words = this.wordsByCode.get(code);
+                words.forEach(item => {
+                    const key = `${code}:${item.word}`;
+                    this.removedWords.delete(key);
+                });
+                this.updateStats();
+                this.render();
+            }
+
+            updateStats() {
+                const totalWords = Array.from(this.wordsByCode.values()).reduce((sum, arr) => sum + arr.length, 0);
+                const duplicateCodes = Array.from(this.wordsByCode.values()).filter(arr => arr.length > 1).length;
+
+                document.getElementById('totalWords').textContent = totalWords;
+                document.getElementById('totalCodes').textContent = this.wordsByCode.size;
+                document.getElementById('duplicateCodes').textContent = duplicateCodes;
+                document.getElementById('toRemove').textContent = this.removedWords.size;
+            }
+
+            setupEventListeners() {
+                // Filters
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentFilter = btn.dataset.filter;
+                        this.render();
+                    });
+                });
+
+                // Search
+                document.getElementById('searchBox').addEventListener('input', (e) => {
+                    this.searchTerm = e.target.value;
+                    this.render();
+                });
+
+                // Reset
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.removedWords.clear();
+                    this.updateStats();
+                    this.render();
+                });
+
+                // Export
+                document.getElementById('exportBtn').addEventListener('click', () => this.showExport());
+                document.getElementById('copyExport').addEventListener('click', () => this.copyExport());
+            }
+
+            showExport() {
+                const output = this.generateWordsJS();
+                document.getElementById('exportOutput').value = output;
+                document.getElementById('exportModal').classList.add('visible');
+            }
+
+            generateWordsJS() {
+                // Collect kept words
+                const baseWords = {};
+                const extendedWords = [];
+
+                for (const [code, words] of this.wordsByCode) {
+                    for (const item of words) {
+                        const key = `${code}:${item.word}`;
+                        if (this.removedWords.has(key)) continue;
+
+                        if (item.source === 'base') {
+                            if (!baseWords[code]) baseWords[code] = [];
+                            baseWords[code].push(item.word);
+                        } else {
+                            extendedWords.push(item.word);
+                        }
+                    }
+                }
+
+                // Generate output
+                let output = `// Memoria App - Word Database
+// Auto-generated by Word Editor
+
+const CODE_MAP = {
+    'R': '0', 'L': '1', 'D': '2', 'M': '3',
+    'C': '4', 'Q': '4', 'K': '4',
+    'S': '5', 'Z': '5',
+    'G': '6', 'T': '7',
+    'B': '8', 'V': '8',
+    'N': '9', 'Ñ': '9'
+};
+
+function wordToCode(word) {
+    let code = '';
+    for (const char of word.toUpperCase()) {
+        if (CODE_MAP[char]) {
+            code += CODE_MAP[char];
+        }
+    }
+    return code;
+}
+
+// Base words (manually assigned codes 0-99)
+const BASE_WORDS = {
+`;
+                // Add base words
+                const sortedBaseCodes = Object.keys(baseWords).sort((a, b) => parseInt(a) - parseInt(b));
+                for (const code of sortedBaseCodes) {
+                    const words = baseWords[code].map(w => `'${w}'`).join(', ');
+                    output += `    '${code}': [${words}],\n`;
+                }
+
+                output += `};
+
+// Extended vocabulary
+const EXTENDED_WORDS = [
+`;
+                // Add extended words in chunks
+                const chunkSize = 10;
+                for (let i = 0; i < extendedWords.length; i += chunkSize) {
+                    const chunk = extendedWords.slice(i, i + chunkSize);
+                    output += `    ${chunk.map(w => `'${w}'`).join(', ')},\n`;
+                }
+
+                output += `];
+
+// Build the complete dictionary
+const WORD_DICT = {};
+
+// Add base words
+for (const [code, words] of Object.entries(BASE_WORDS)) {
+    WORD_DICT[code] = [...words];
+}
+
+// Add extended words
+for (const word of EXTENDED_WORDS) {
+    const code = wordToCode(word);
+    if (code) {
+        if (!WORD_DICT[code]) {
+            WORD_DICT[code] = [];
+        }
+        if (!WORD_DICT[code].includes(word.toUpperCase())) {
+            WORD_DICT[code].push(word.toUpperCase());
+        }
+    }
+}
+`;
+                return output;
+            }
+
+            copyExport() {
+                const textarea = document.getElementById('exportOutput');
+                textarea.select();
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    const btn = document.getElementById('copyExport');
+                    btn.textContent = 'Copiado!';
+                    setTimeout(() => btn.textContent = 'Copiar', 1500);
+                });
+            }
+        }
+
+        const editor = new WordEditor();
+    </script>
+</body>
+</html>
